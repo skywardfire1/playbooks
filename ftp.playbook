@@ -1,0 +1,9 @@
+- name: Настройка FTP
+  hosts: fileservers
+  become: yes
+  
+  tasks:
+    - { name: Обновляем кэш, apt: { update_cache: yes, cache_valid_time: 3000 } }
+    - { name: Ставим VSFTPD, apt: { pkg: vsftpd } }
+    - { name: Подкладываем правильный конфиг, copy: { src: vsftpd.conf, dest: /etc } }
+    - { name: Перезапускаем сервис, service: { name: vsftpd, state: reloaded } }

@@ -1,0 +1,42 @@
+- name: Привести в порядок всё на тошибе
+  hosts: all
+  become: yes
+
+  tasks:
+  - name: Удалить лишний софт
+    apt:
+      pkg:
+        - xmms2
+        - openvpn
+        - bluedevil
+        - bluez-tools
+        - discord
+        - hplip
+        - hplip-data
+      state: absent
+
+  - name: Удаление неиспользуемых пакетов
+    apt:
+      autoremove: yes
+
+  - name: Установка нужных пакетов
+    apt:
+      pkg: postgresql-15, python3-pip, postgresql-server-dev-15
+
+  - name: Создание пользователя в системе
+    user:
+      name: postgres
+      group: users
+      password: '$6$pKMFXmI/WMlGCt8Z$hgI9QuetCYOic6uUYti7ro2qlUgmEXwwI5aDhhyR9rHuPpbks47pti0uLXEBZkQxJ80qBXNgrtUFxpR94IwrK.'
+      
+  - name: Доустановка библиотек в Питон
+    pip:
+      name: psycopg2
+      extra_args: --trusted-host=files.pythonhosted.org --trusted-host=pypi.org
+
+  - name: Создание базы
+    postgresql_db:
+      db: test
+      login_host: 127.0.0.1
+      login_password: '$6$LksXo6czJ3AJXiy3$vZdOyHF95os5fS.k0rM3Z7F.HtIAANTRvfaupx6u0FSnYoMjg2FJwyjVfInkbL7RmYIqc0fJDZOycvBcGyVzA.'
+      
