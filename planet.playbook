@@ -1,0 +1,41 @@
+#  TODO
+#  Перенести сюда задачу по созданию базы
+#
+
+- name: Настройка почтового сервиса на EXIM + Dovecot
+  hosts: dc
+  become: yes
+  
+  tasks:
+    - { name: Обновляем кэш если устарел, apt: { update_cache: yes, cache_valid_time: 3000 } }
+    - name: Устанавливаем пакеты почтового сервера
+      apt:
+        pkg: exim4, dovecot-core, dovecot-imapd, dovecot-pgsql, postfixadmin
+        force_apt_get: yes
+          
+    - name: Создаём базу учётных данных для dovecot
+      postgresql_db:
+        login_host: 127.0.0.1
+        login_user: mail
+        login_password: '12341234'
+        db: dovecot
+        
+    - name: Создаём таблицу для учётных данных пользователей
+      postgresql_table:
+        login_host: 127.0.0.1
+        login_user: mail
+        login_password: '12341234' # в идеале должно быть на сокетах
+        # У этого модуля в условной "секции подключения" еще дополнительный параметр
+        login_db: dovecot
+
+        # Подключились, наконец. Что создаём?
+        table: users
+        columns:
+          - username VARCHAR(128) NOT NULL
+          - domain VARCHAR(128) NOT NULL
+          - password VARCHAR(64) NOT NULL
+          - home VARCHAR(255) NOT NULL
+          - uid INTEGER NOT NULL
+          - gid INTEGER NOT NULL
+          - active CHAR(1) DEFAULT 'Y' NOT NULL
+
